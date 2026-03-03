@@ -41,8 +41,9 @@ export function generateProblem(mode, activeOps) {
     correctAnswer = a - b;
     text = `${a} − ${b} = ?`;
   } else {
-    a = rand(1, r.mul);
-    b = rand(1, r.mul);
+    const mulMin = mode === 'easy' ? 1 : 2;
+    a = rand(mulMin, r.mul);
+    b = rand(mulMin, r.mul);
     correctAnswer = a * b;
     text = `${a} × ${b} = ?`;
   }

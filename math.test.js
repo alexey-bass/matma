@@ -91,6 +91,32 @@ describe('generateProblem', () => {
     }
   });
 
+  it('never produces x1 multiplication on medium', () => {
+    for (let i = 0; i < 200; i++) {
+      const p = generateProblem('medium', ['×']);
+      assert.ok(p.a >= 2, `medium: a was ${p.a}`);
+      assert.ok(p.b >= 2, `medium: b was ${p.b}`);
+    }
+  });
+
+  it('never produces x1 multiplication on hard', () => {
+    for (let i = 0; i < 200; i++) {
+      const p = generateProblem('hard', ['×']);
+      assert.ok(p.a >= 2, `hard: a was ${p.a}`);
+      assert.ok(p.b >= 2, `hard: b was ${p.b}`);
+    }
+  });
+
+  it('allows x1 multiplication on easy', () => {
+    // Run enough times that we'd expect to see a 1 if it's possible
+    let sawOne = false;
+    for (let i = 0; i < 500; i++) {
+      const p = generateProblem('easy', ['×']);
+      if (p.a === 1 || p.b === 1) { sawOne = true; break; }
+    }
+    assert.ok(sawOne, 'easy mode should allow 1 as a multiplication operand');
+  });
+
   it('returns a text property with = ?', () => {
     const p = generateProblem('easy', ['+']);
     assert.ok(p.text.endsWith('= ?'));
