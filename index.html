@@ -34,6 +34,48 @@
 
   h1 { font-size: 2rem; margin-bottom: 8px; color: #333; }
 
+  /* --- Language picker --- */
+  .lang-screen { display: flex; flex-direction: column; align-items: center; }
+  .lang-screen h1 { font-size: 2.2rem; margin-bottom: 32px; }
+  .lang-options { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .lang-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 36px;
+    border: 3px solid #ddd;
+    border-radius: 24px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 160px;
+  }
+  .lang-btn:hover { border-color: #667eea; transform: scale(1.05); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .lang-btn:active { transform: scale(0.97); }
+  .lang-flag {
+    width: 80px;
+    height: 54px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .flag-en .flag-stripe-1 { flex: 1; background: #012169; }
+  .flag-en .flag-stripe-2 { flex: 1; background: #C8102E; }
+  .flag-en .flag-stripe-3 { flex: 1; background: #FFFFFF; }
+  .flag-pl .flag-stripe-1 { flex: 1; background: #FFFFFF; }
+  .flag-pl .flag-stripe-2 { flex: 1; background: #DC143C; }
+  .lang-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #333;
+  }
+
+  /* --- Game screen (hidden initially) --- */
+  .game-screen { display: none; }
+
   /* --- Score bar --- */
   .score-bar {
     display: flex;
@@ -182,70 +224,130 @@
 <body class="theme-default">
 
 <div class="card">
-  <h1>Math Fun!</h1>
 
-  <div class="score-bar">
-    <span>Score: <span class="correct" id="scoreVal">0</span></span>
-    <span>Streak: <span class="streak" id="streakVal">0</span></span>
+  <!-- ======== Language picker ======== -->
+  <div class="lang-screen" id="langScreen">
+    <h1>Choose Language</h1>
+    <div class="lang-options">
+      <button class="lang-btn" data-lang="en">
+        <div class="lang-flag flag-en">
+          <div class="flag-stripe-1"></div>
+          <div class="flag-stripe-2"></div>
+          <div class="flag-stripe-3"></div>
+        </div>
+        <span class="lang-name">English</span>
+      </button>
+      <button class="lang-btn" data-lang="pl">
+        <div class="lang-flag flag-pl">
+          <div class="flag-stripe-1"></div>
+          <div class="flag-stripe-2"></div>
+        </div>
+        <span class="lang-name">Polski</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Difficulty -->
-  <div class="mode-selector">
-    <button class="mode-btn active" data-mode="easy">Easy</button>
-    <button class="mode-btn" data-mode="medium">Medium</button>
-    <button class="mode-btn" data-mode="hard">Hard</button>
+  <!-- ======== Game screen ======== -->
+  <div class="game-screen" id="gameScreen">
+    <h1 id="title">Math Fun!</h1>
+
+    <div class="score-bar">
+      <span><span id="scoreLbl">Score</span>: <span class="correct" id="scoreVal">0</span></span>
+      <span><span id="streakLbl">Streak</span>: <span class="streak" id="streakVal">0</span></span>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="mode-selector">
+      <button class="mode-btn active" data-mode="easy" id="btnEasy">Easy</button>
+      <button class="mode-btn" data-mode="medium" id="btnMedium">Medium</button>
+      <button class="mode-btn" data-mode="hard" id="btnHard">Hard</button>
+    </div>
+
+    <!-- Operations -->
+    <div class="settings-row">
+      <button class="op-btn active" data-op="+">+</button>
+      <button class="op-btn active" data-op="−">−</button>
+      <button class="op-btn" data-op="×">×</button>
+    </div>
+
+    <div class="problem" id="problem"></div>
+
+    <div class="feedback" id="feedback"></div>
+    <div class="stars" id="stars"></div>
+
+    <div class="input-row">
+      <input id="answer" type="number" inputmode="numeric" autocomplete="off" />
+      <button class="btn-check" id="checkBtn">GO</button>
+    </div>
+
+    <!-- Number pad for tablets / phones -->
+    <div class="numpad">
+      <button data-val="1">1</button>
+      <button data-val="2">2</button>
+      <button data-val="3">3</button>
+      <button data-val="4">4</button>
+      <button data-val="5">5</button>
+      <button data-val="6">6</button>
+      <button data-val="7">7</button>
+      <button data-val="8">8</button>
+      <button data-val="9">9</button>
+      <button data-val="0">0</button>
+      <button data-val="back">&#9003;</button>
+      <button class="wide" data-val="go">GO!</button>
+      <button data-val="clear">C</button>
+      <button data-val="neg">−</button>
+    </div>
   </div>
 
-  <!-- Operations -->
-  <div class="settings-row">
-    <button class="op-btn active" data-op="+">+</button>
-    <button class="op-btn active" data-op="−">−</button>
-    <button class="op-btn" data-op="×">×</button>
-  </div>
-
-  <div class="problem" id="problem"></div>
-
-  <div class="feedback" id="feedback"></div>
-  <div class="stars" id="stars"></div>
-
-  <div class="input-row">
-    <input id="answer" type="number" inputmode="numeric" autocomplete="off" />
-    <button class="btn-check" id="checkBtn">GO</button>
-  </div>
-
-  <!-- Number pad for tablets / phones -->
-  <div class="numpad">
-    <button data-val="1">1</button>
-    <button data-val="2">2</button>
-    <button data-val="3">3</button>
-    <button data-val="4">4</button>
-    <button data-val="5">5</button>
-    <button data-val="6">6</button>
-    <button data-val="7">7</button>
-    <button data-val="8">8</button>
-    <button data-val="9">9</button>
-    <button data-val="0">0</button>
-    <button data-val="back">&#9003;</button>
-    <button class="wide" data-val="go">GO!</button>
-    <button data-val="clear">C</button>
-    <button data-val="neg">−</button>
-  </div>
 </div>
 
 <script>
 (function () {
+  /* --- i18n --- */
+  const T = {
+    en: {
+      title: 'Math Fun!',
+      score: 'Score',
+      streak: 'Streak',
+      easy: 'Easy',
+      medium: 'Medium',
+      hard: 'Hard',
+      praise: ['Awesome!', 'Great job!', 'You rock!', 'Super!', 'Fantastic!', 'Brilliant!', 'Nice one!', 'Wow!', 'Perfect!'],
+      encourage: ['Almost!', 'Try again!', 'Keep going!', 'You can do it!', 'Not quite!', 'So close!'],
+      wasAnswer: 'It was',
+    },
+    pl: {
+      title: 'Matma!',
+      score: 'Wynik',
+      streak: 'Seria',
+      easy: 'Latwy',
+      medium: 'Sredni',
+      hard: 'Trudny',
+      praise: ['Super!', 'Brawo!', 'Swietnie!', 'Tak trzymaj!', 'Fantastycznie!', 'Genialnie!', 'Wow!', 'Doskonale!', 'Rewelacja!'],
+      encourage: ['Prawie!', 'Sprobuj jeszcze raz!', 'Nie poddawaj sie!', 'Dasz rade!', 'Niewiele brakuje!', 'Blisko!'],
+      wasAnswer: 'Poprawna odpowiedz to',
+    }
+  };
+
+  let lang = 'en';
+
   /* --- State --- */
   let correctAnswer = 0;
   let score = 0;
   let streak = 0;
   let bestStreak = 0;
-  let mode = 'easy';       // easy | medium | hard
+  let mode = 'easy';
   let ops = new Set(['+', '−']);
 
-  const PRAISE = ['Awesome!', 'Great job!', 'You rock!', 'Super!', 'Fantastic!', 'Brilliant!', 'Nice one!', 'Wow!', 'Perfect!'];
-  const ENCOURAGE = ['Almost!', 'Try again!', 'Keep going!', 'You can do it!', 'Not quite!', 'So close!'];
-
   /* --- DOM refs --- */
+  const langScreen = document.getElementById('langScreen');
+  const gameScreen = document.getElementById('gameScreen');
+  const titleEl    = document.getElementById('title');
+  const scoreLbl   = document.getElementById('scoreLbl');
+  const streakLbl  = document.getElementById('streakLbl');
+  const btnEasy    = document.getElementById('btnEasy');
+  const btnMedium  = document.getElementById('btnMedium');
+  const btnHard    = document.getElementById('btnHard');
   const problemEl  = document.getElementById('problem');
   const feedbackEl = document.getElementById('feedback');
   const starsEl    = document.getElementById('stars');
@@ -257,6 +359,31 @@
   /* --- Helpers --- */
   const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const t = () => T[lang];
+
+  /* --- Language picker --- */
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang;
+      startGame();
+    });
+  });
+
+  function startGame() {
+    langScreen.style.display = 'none';
+    gameScreen.style.display = 'block';
+    applyLang();
+    newProblem();
+  }
+
+  function applyLang() {
+    titleEl.textContent   = t().title;
+    scoreLbl.textContent  = t().score;
+    streakLbl.textContent = t().streak;
+    btnEasy.textContent   = t().easy;
+    btnMedium.textContent = t().medium;
+    btnHard.textContent   = t().hard;
+  }
 
   /* --- Range per difficulty --- */
   function getRange() {
@@ -280,7 +407,7 @@
       text = `${a} + ${b} = ?`;
     } else if (op === '−') {
       a = rand(1, r.add);
-      b = rand(1, a);          // keep result >= 0
+      b = rand(1, a);
       correctAnswer = a - b;
       text = `${a} − ${b} = ?`;
     } else {
@@ -307,14 +434,14 @@
       score++;
       streak++;
       if (streak > bestStreak) bestStreak = streak;
-      feedbackEl.textContent = pick(PRAISE);
+      feedbackEl.textContent = pick(t().praise);
       feedbackEl.className = 'feedback correct-text';
       document.body.className = 'theme-correct';
       updateStars();
       setTimeout(newProblem, 900);
     } else {
       streak = 0;
-      feedbackEl.textContent = `${pick(ENCOURAGE)} It was ${correctAnswer}.`;
+      feedbackEl.textContent = `${pick(t().encourage)} ${t().wasAnswer} ${correctAnswer}.`;
       feedbackEl.className = 'feedback wrong-text';
       document.body.className = 'theme-wrong';
       updateStars();
@@ -375,9 +502,6 @@
       answerEl.focus();
     });
   });
-
-  /* --- Start --- */
-  newProblem();
 })();
 </script>
 </body>
