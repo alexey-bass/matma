@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Fun!</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.5s;
+  }
+
+  /* --- Themes --- */
+  body.theme-default { background: linear-gradient(135deg, #667eea, #764ba2); }
+  body.theme-correct { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  body.theme-wrong   { background: linear-gradient(135deg, #f78ca0, #f9748f); }
+
+  .card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    padding: 40px 48px;
+    max-width: 520px;
+    width: 92%;
+    text-align: center;
+  }
+
+  h1 { font-size: 2rem; margin-bottom: 8px; color: #333; }
+
+  /* --- Score bar --- */
+  .score-bar {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #555;
+  }
+  .score-bar .correct { color: #2ecc71; }
+  .score-bar .streak  { color: #e67e22; }
+
+  /* --- Difficulty selector --- */
+  .mode-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .mode-btn {
+    padding: 8px 18px;
+    border: 2px solid #ddd;
+    border-radius: 50px;
+    background: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+  }
+  .mode-btn:hover { border-color: #667eea; color: #667eea; }
+  .mode-btn.active { background: #667eea; color: #fff; border-color: #667eea; }
+
+  /* --- Problem display --- */
+  .problem {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #333;
+    margin: 24px 0;
+    letter-spacing: 2px;
+    min-height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* --- Input area --- */
+  .input-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  #answer {
+    font-size: 2.2rem;
+    width: 140px;
+    text-align: center;
+    padding: 10px;
+    border: 3px solid #ddd;
+    border-radius: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+    font-weight: 700;
+  }
+  #answer:focus { border-color: #667eea; }
+
+  .btn-check {
+    font-size: 1.6rem;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 16px;
+    background: #667eea;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.15s, background 0.3s;
+  }
+  .btn-check:hover { background: #5a6fd6; }
+  .btn-check:active { transform: scale(0.95); }
+
+  /* --- Feedback --- */
+  .feedback {
+    font-size: 1.5rem;
+    font-weight: 700;
+    min-height: 2.2rem;
+    margin-bottom: 8px;
+    transition: opacity 0.3s;
+  }
+  .feedback.correct-text { color: #27ae60; }
+  .feedback.wrong-text   { color: #e74c3c; }
+
+  /* --- Stars streak --- */
+  .stars {
+    font-size: 1.8rem;
+    min-height: 2rem;
+    margin-bottom: 4px;
+    letter-spacing: 4px;
+  }
+
+  /* --- Number pad (for touch) --- */
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .numpad button {
+    font-size: 1.5rem;
+    padding: 14px 0;
+    border: 2px solid #ddd;
+    border-radius: 14px;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .numpad button:hover { background: #667eea; color: #fff; border-color: #667eea; }
+  .numpad button:active { transform: scale(0.93); }
+  .numpad .wide { grid-column: span 2; }
+
+  /* --- Settings toggle --- */
+  .settings-row {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .op-btn {
+    padding: 6px 16px;
+    border: 2px solid #ddd;
+    border-radius: 50px;
+    background: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .op-btn:hover { border-color: #764ba2; color: #764ba2; }
+  .op-btn.active { background: #764ba2; color: #fff; border-color: #764ba2; }
+</style>
+</head>
+<body class="theme-default">
+
+<div class="card">
+  <h1>Math Fun!</h1>
+
+  <div class="score-bar">
+    <span>Score: <span class="correct" id="scoreVal">0</span></span>
+    <span>Streak: <span class="streak" id="streakVal">0</span></span>
+  </div>
+
+  <!-- Difficulty -->
+  <div class="mode-selector">
+    <button class="mode-btn active" data-mode="easy">Easy</button>
+    <button class="mode-btn" data-mode="medium">Medium</button>
+    <button class="mode-btn" data-mode="hard">Hard</button>
+  </div>
+
+  <!-- Operations -->
+  <div class="settings-row">
+    <button class="op-btn active" data-op="+">+</button>
+    <button class="op-btn active" data-op="−">−</button>
+    <button class="op-btn" data-op="×">×</button>
+  </div>
+
+  <div class="problem" id="problem"></div>
+
+  <div class="feedback" id="feedback"></div>
+  <div class="stars" id="stars"></div>
+
+  <div class="input-row">
+    <input id="answer" type="number" inputmode="numeric" autocomplete="off" />
+    <button class="btn-check" id="checkBtn">GO</button>
+  </div>
+
+  <!-- Number pad for tablets / phones -->
+  <div class="numpad">
+    <button data-val="1">1</button>
+    <button data-val="2">2</button>
+    <button data-val="3">3</button>
+    <button data-val="4">4</button>
+    <button data-val="5">5</button>
+    <button data-val="6">6</button>
+    <button data-val="7">7</button>
+    <button data-val="8">8</button>
+    <button data-val="9">9</button>
+    <button data-val="0">0</button>
+    <button data-val="back">&#9003;</button>
+    <button class="wide" data-val="go">GO!</button>
+    <button data-val="clear">C</button>
+    <button data-val="neg">−</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* --- State --- */
+  let correctAnswer = 0;
+  let score = 0;
+  let streak = 0;
+  let bestStreak = 0;
+  let mode = 'easy';       // easy | medium | hard
+  let ops = new Set(['+', '−']);
+
+  const PRAISE = ['Awesome!', 'Great job!', 'You rock!', 'Super!', 'Fantastic!', 'Brilliant!', 'Nice one!', 'Wow!', 'Perfect!'];
+  const ENCOURAGE = ['Almost!', 'Try again!', 'Keep going!', 'You can do it!', 'Not quite!', 'So close!'];
+
+  /* --- DOM refs --- */
+  const problemEl  = document.getElementById('problem');
+  const feedbackEl = document.getElementById('feedback');
+  const starsEl    = document.getElementById('stars');
+  const answerEl   = document.getElementById('answer');
+  const scoreEl    = document.getElementById('scoreVal');
+  const streakEl   = document.getElementById('streakVal');
+  const checkBtn   = document.getElementById('checkBtn');
+
+  /* --- Helpers --- */
+  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  /* --- Range per difficulty --- */
+  function getRange() {
+    if (mode === 'easy')   return { add: 20, mul: 5 };
+    if (mode === 'medium') return { add: 50, mul: 10 };
+    return { add: 100, mul: 12 };
+  }
+
+  /* --- Generate problem --- */
+  function newProblem() {
+    const activeOps = [...ops];
+    if (activeOps.length === 0) { ops.add('+'); activeOps.push('+'); updateOpButtons(); }
+    const op = pick(activeOps);
+    const r = getRange();
+    let a, b, text;
+
+    if (op === '+') {
+      a = rand(1, r.add);
+      b = rand(1, r.add);
+      correctAnswer = a + b;
+      text = `${a} + ${b} = ?`;
+    } else if (op === '−') {
+      a = rand(1, r.add);
+      b = rand(1, a);          // keep result >= 0
+      correctAnswer = a - b;
+      text = `${a} − ${b} = ?`;
+    } else {
+      a = rand(1, r.mul);
+      b = rand(1, r.mul);
+      correctAnswer = a * b;
+      text = `${a} × ${b} = ?`;
+    }
+
+    problemEl.textContent = text;
+    feedbackEl.textContent = '';
+    feedbackEl.className = 'feedback';
+    answerEl.value = '';
+    document.body.className = 'theme-default';
+    answerEl.focus();
+  }
+
+  /* --- Check answer --- */
+  function check() {
+    const val = answerEl.value.trim();
+    if (val === '') return;
+
+    if (parseInt(val, 10) === correctAnswer) {
+      score++;
+      streak++;
+      if (streak > bestStreak) bestStreak = streak;
+      feedbackEl.textContent = pick(PRAISE);
+      feedbackEl.className = 'feedback correct-text';
+      document.body.className = 'theme-correct';
+      updateStars();
+      setTimeout(newProblem, 900);
+    } else {
+      streak = 0;
+      feedbackEl.textContent = `${pick(ENCOURAGE)} It was ${correctAnswer}.`;
+      feedbackEl.className = 'feedback wrong-text';
+      document.body.className = 'theme-wrong';
+      updateStars();
+      setTimeout(newProblem, 1800);
+    }
+
+    scoreEl.textContent = score;
+    streakEl.textContent = streak;
+  }
+
+  function updateStars() {
+    starsEl.textContent = streak > 0 ? Array(Math.min(streak, 10)).fill('\u2B50').join('') : '';
+  }
+
+  /* --- Difficulty buttons --- */
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      mode = btn.dataset.mode;
+      newProblem();
+    });
+  });
+
+  /* --- Operation toggle buttons --- */
+  function updateOpButtons() {
+    document.querySelectorAll('.op-btn').forEach(b => {
+      b.classList.toggle('active', ops.has(b.dataset.op));
+    });
+  }
+  document.querySelectorAll('.op-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const op = btn.dataset.op;
+      if (ops.has(op) && ops.size > 1) ops.delete(op);
+      else ops.add(op);
+      updateOpButtons();
+      newProblem();
+    });
+  });
+
+  /* --- Submit via button or Enter --- */
+  checkBtn.addEventListener('click', check);
+  answerEl.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+
+  /* --- Numpad --- */
+  document.querySelectorAll('.numpad button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.val;
+      if (v === 'go') { check(); return; }
+      if (v === 'clear') { answerEl.value = ''; answerEl.focus(); return; }
+      if (v === 'back') { answerEl.value = answerEl.value.slice(0, -1); answerEl.focus(); return; }
+      if (v === 'neg') {
+        answerEl.value = answerEl.value.startsWith('-') ? answerEl.value.slice(1) : '-' + answerEl.value;
+        answerEl.focus();
+        return;
+      }
+      answerEl.value += v;
+      answerEl.focus();
+    });
+  });
+
+  /* --- Start --- */
+  newProblem();
+})();
+</script>
+</body>
+</html>
