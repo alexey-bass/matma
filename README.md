@@ -2,7 +2,7 @@
 
 A standalone HTML math learning app for 2nd graders (ages 7-9).
 
-**[Play now](https://alexey-bass.github.io/kids-math-g2/)**
+**[Play now](https://alexey-bass.github.io/matma/)**
 
 ## Features
 
@@ -17,7 +17,7 @@ A standalone HTML math learning app for 2nd graders (ages 7-9).
 
 ## How to use
 
-Visit the [live version](https://alexey-bass.github.io/kids-math-g2/).
+Visit the [live version](https://alexey-bass.github.io/matma/).
 
 ## Local development
 
