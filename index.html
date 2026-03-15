@@ -268,11 +268,76 @@
     padding: 8px 0;
     color: #333;
   }
+
+  /* --- About button & modal --- */
+  .about-btn {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+  .about-btn:hover { opacity: 0.8; }
+
+  .about-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .about-overlay.visible { display: flex; }
+  .about-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 36px;
+    max-width: 360px;
+    width: 88%;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  }
+  .about-box h2 { font-size: 1.6rem; margin-bottom: 16px; color: #333; }
+  .about-box a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .about-box a:hover { text-decoration: underline; }
+  .about-box p { margin: 10px 0; font-size: 1.05rem; color: #555; }
+  .about-close {
+    margin-top: 18px;
+    padding: 8px 28px;
+    border: 2px solid #ddd;
+    border-radius: 50px;
+    background: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .about-close:hover { border-color: #667eea; color: #667eea; }
 </style>
 </head>
 <body class="theme-default">
 
-<div class="card">
+<div class="card" style="position:relative;">
+  <button class="about-btn" id="aboutBtn" title="About">&#x2139;&#xFE0F;</button>
+
+  <!-- ======== About overlay ======== -->
+  <div class="about-overlay" id="aboutOverlay">
+    <div class="about-box">
+      <h2>Math Fun!</h2>
+      <p>&copy; <a href="https://www.linkedin.com/in/alexeybass/" target="_blank" rel="noopener">Alexey Bass</a></p>
+      <p><a href="https://github.com/alexey-bass/kids-math-g2" target="_blank" rel="noopener">GitHub</a></p>
+      <button class="about-close" id="aboutClose">OK</button>
+    </div>
+  </div>
 
   <!-- ======== Language picker ======== -->
   <div class="lang-screen" id="langScreen">
@@ -886,6 +951,12 @@ document.querySelectorAll('.numpad button').forEach(btn => {
     answerEl.focus();
   });
 });
+
+/* --- About popup --- */
+const aboutOverlay = document.getElementById('aboutOverlay');
+document.getElementById('aboutBtn').addEventListener('click', () => aboutOverlay.classList.add('visible'));
+document.getElementById('aboutClose').addEventListener('click', () => aboutOverlay.classList.remove('visible'));
+aboutOverlay.addEventListener('click', e => { if (e.target === aboutOverlay) aboutOverlay.classList.remove('visible'); });
 </script>
 </body>
 </html>
