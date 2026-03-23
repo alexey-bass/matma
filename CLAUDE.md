@@ -15,7 +15,7 @@ Live: https://alexey-bass.github.io/matma/
 
 ## Architecture
 
-- **`index.html`** — entire app: HTML, CSS, and game logic in a `<script type="module">`. Contains i18n strings (English/Polish/Ukrainian), UI state management, DOM event handlers, and numpad input.
+- **`index.html`** — entire app: HTML, CSS, and game logic in a `<script type="module">`. Contains i18n strings (English/Polish), UI state management, DOM event handlers, and numpad input.
 - **`math.js`** — pure functions extracted for testability: `rand`, `pick`, `getRange`, `generateProblem`, `shuffle`, `generateTableProblems`, `checkAnswer`. Imported by both `index.html` and tests.
 - **`math.test.js`** — tests for `math.js` using `node:test` and `node:assert/strict`.
 
