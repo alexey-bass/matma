@@ -76,7 +76,9 @@
     font-weight: 600;
     color: #555;
   }
+  .score-bar .total   { color: #3498db; }
   .score-bar .correct { color: #2ecc71; }
+  .score-bar .wrong   { color: #e74c3c; }
   .score-bar .streak  { color: #e67e22; }
 
   /* --- Difficulty selector --- */
@@ -453,7 +455,9 @@
     </div>
 
     <div class="score-bar">
-      <span><span id="scoreLbl">Score</span>: <span class="correct" id="scoreVal">0</span></span>
+      <span><span id="totalLbl">Total</span>: <span class="total" id="totalVal">0</span></span>
+      <span><span id="correctLbl">Correct</span>: <span class="correct" id="correctVal">0</span></span>
+      <span><span id="wrongLbl">Wrong</span>: <span class="wrong" id="wrongVal">0</span></span>
       <span><span id="streakLbl">Streak</span>: <span class="streak" id="streakVal">0</span></span>
     </div>
 
@@ -514,7 +518,6 @@ import { pick, shuffle, generateProblem, generateTableProblems, checkAnswer } fr
 const T = {
   en: {
     title: 'Math Fun!',
-    score: 'Score',
     streak: 'Streak',
     easy: 'Easy',
     medium: 'Medium',
@@ -541,7 +544,6 @@ const T = {
   },
   pl: {
     title: 'Matma!',
-    score: 'Wynik',
     streak: 'Seria',
     easy: 'Latwy',
     medium: 'Sredni',
@@ -596,7 +598,9 @@ const challengeSetup  = document.getElementById('challengeSetup');
 const resultsScreen   = document.getElementById('resultsScreen');
 const gameScreen      = document.getElementById('gameScreen');
 const titleEl         = document.getElementById('title');
-const scoreLbl        = document.getElementById('scoreLbl');
+const totalLbl        = document.getElementById('totalLbl');
+const correctLbl      = document.getElementById('correctLbl');
+const wrongLbl        = document.getElementById('wrongLbl');
 const streakLbl       = document.getElementById('streakLbl');
 const btnEasy         = document.getElementById('btnEasy');
 const btnMedium       = document.getElementById('btnMedium');
@@ -605,7 +609,9 @@ const problemEl       = document.getElementById('problem');
 const feedbackEl      = document.getElementById('feedback');
 const starsEl         = document.getElementById('stars');
 const answerEl        = document.getElementById('answer');
-const scoreEl         = document.getElementById('scoreVal');
+const totalEl         = document.getElementById('totalVal');
+const correctEl       = document.getElementById('correctVal');
+const wrongEl         = document.getElementById('wrongVal');
 const streakEl        = document.getElementById('streakVal');
 const checkBtn        = document.getElementById('checkBtn');
 const timerBar        = document.getElementById('timerBar');
@@ -672,7 +678,9 @@ function resetStats() {
   streak = 0;
   bestStreak = 0;
   totalSolveTime = 0;
-  scoreEl.textContent = '0';
+  totalEl.textContent = '0';
+  correctEl.textContent = '0';
+  wrongEl.textContent = '0';
   streakEl.textContent = '0';
   starsEl.textContent = '';
 }
@@ -709,7 +717,9 @@ function applyAllLang() {
 
 function applyGameLang() {
   titleEl.textContent   = t().title;
-  scoreLbl.textContent  = t().score;
+  totalLbl.textContent   = t().total;
+  correctLbl.textContent = t().correct;
+  wrongLbl.textContent   = t().wrong;
   streakLbl.textContent = t().streak;
   btnEasy.textContent   = t().easy;
   btnMedium.textContent = t().medium;
@@ -882,7 +892,9 @@ function check() {
     setTimeout(newProblem, 1800);
   }
 
-  scoreEl.textContent = score;
+  totalEl.textContent = score + wrongCount;
+  correctEl.textContent = score;
+  wrongEl.textContent = wrongCount;
   streakEl.textContent = streak;
 }
 

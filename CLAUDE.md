@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Kids math practice app for 2nd graders. Single-page HTML app with zero dependencies and no build step. Deployed to GitHub Pages via CI on push to `main`.
+Kids math practice app. Single-page HTML app with zero dependencies and no build step. Deployed to GitHub Pages via CI on push to `main`.
 
 Live: https://alexey-bass.github.io/matma/
 

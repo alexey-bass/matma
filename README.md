@@ -1,6 +1,6 @@
-# Kids Math G2
+# Matma
 
-A standalone HTML math learning app for 2nd graders (ages 7-9).
+A standalone HTML math learning app for kids.
 
 **[Play now](https://alexey-bass.github.io/matma/)**
 
@@ -11,7 +11,7 @@ A standalone HTML math learning app for 2nd graders (ages 7-9).
 - **3 Difficulty levels** — Easy (up to 20), Medium (up to 50), Hard (up to 100)
 - **2 Languages** — English and Polish, selected at startup with flag icons
 - **Challenge mode** — choose timer (2/5/10 min), difficulty, and operations; see results with accuracy and average solve time
-- **Score & streak tracking** with star rewards
+- **Live counters** — total, correct, wrong, and streak with star rewards
 - **Touch-friendly** — on-screen numpad for tablets and phones
 - **Zero dependencies** — no build step, no npm install needed
 
