@@ -7,7 +7,7 @@ A standalone HTML math learning app for kids.
 ## Features
 
 - **Addition, Subtraction, Multiplication, Division** — toggle operations on/off
-- **3 Game modes** — Practice (endless), Challenge (timed with results), and Times Tables (all 81 facts from 1×1 to 9×9)
+- **6 Game modes** — Practice (endless), Challenge (timed with results), Times Tables (all 81 facts from 1×1 to 9×9), Missing Number (`? + 5 = 12`), True or False (tap ✓ / ✗), and Number Bonds (Make 10 / 20 / 100)
 - **3 Difficulty levels** — Easy (up to 20), Medium (up to 50), Hard (up to 100)
 - **2 Languages** — English and Polish, selected at startup with flag icons
 - **Challenge mode** — choose timer (2/5/10 min), difficulty, and operations; see results with accuracy and average solve time

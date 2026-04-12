@@ -151,6 +151,30 @@
   .btn-check:hover { background: #5a6fd6; }
   .btn-check:active { transform: scale(0.95); }
 
+  /* --- True / False buttons --- */
+  .tf-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .tf-btn {
+    font-size: 1.6rem;
+    font-weight: 700;
+    padding: 16px 32px;
+    border: none;
+    border-radius: 16px;
+    color: #fff;
+    cursor: pointer;
+    min-width: 140px;
+    transition: transform 0.15s, background 0.3s;
+  }
+  .tf-true  { background: #2ecc71; }
+  .tf-true:hover  { background: #27ae60; }
+  .tf-false { background: #e74c3c; }
+  .tf-false:hover { background: #c0392b; }
+  .tf-btn:active { transform: scale(0.95); }
+
   /* --- Feedback --- */
   .feedback {
     font-size: 1.5rem;
@@ -388,6 +412,18 @@
         <div class="lang-flag">&#x1F9EE;</div>
         <span class="lang-name" id="tablesLabel">Times Tables</span>
       </button>
+      <button class="lang-btn" id="btnMissing" data-gmode="missing">
+        <div class="lang-flag">&#x1F50E;</div>
+        <span class="lang-name" id="missingLabel">Missing Number</span>
+      </button>
+      <button class="lang-btn" id="btnTrueFalse" data-gmode="truefalse">
+        <div class="lang-flag">&#x2696;&#xFE0F;</div>
+        <span class="lang-name" id="trueFalseLabel">True or False</span>
+      </button>
+      <button class="lang-btn" id="btnMakeN" data-gmode="makeN">
+        <div class="lang-flag">&#x1F3AF;</div>
+        <span class="lang-name" id="makeNLabel">Number Bonds</span>
+      </button>
     </div>
   </div>
 
@@ -485,9 +521,14 @@
     <div class="feedback" id="feedback"></div>
     <div class="stars" id="stars"></div>
 
-    <div class="input-row">
+    <div class="input-row" id="inputRow">
       <input id="answer" type="text" readonly autocomplete="off" />
       <button class="btn-check" id="checkBtn">GO</button>
+    </div>
+
+    <div class="tf-row" id="tfRow" style="display:none">
+      <button class="tf-btn tf-true" id="tfTrueBtn">&#x2714; <span id="tfTrueLbl">True</span></button>
+      <button class="tf-btn tf-false" id="tfFalseBtn">&#x2718; <span id="tfFalseLbl">False</span></button>
     </div>
 
     <!-- Number pad for tablets / phones -->
@@ -512,7 +553,7 @@
 </div>
 
 <script type="module">
-import { pick, shuffle, generateProblem, generateTableProblems, checkAnswer } from './math.js';
+import { pick, shuffle, generateProblem, generateTableProblems, checkAnswer, generateMissingProblem, generateTrueFalseProblem, generateMakeProblem } from './math.js';
 
 /* --- i18n --- */
 const T = {
@@ -539,6 +580,13 @@ const T = {
     avgTime: 'Avg time',
     playAgain: 'Play Again',
     timesTables: 'Times Tables',
+    missingNumber: 'Missing Number',
+    trueOrFalse: 'True or False',
+    numberBonds: 'Number Bonds',
+    trueLbl: 'True',
+    falseLbl: 'False',
+    wasTrue: 'It was True.',
+    wasFalse: 'It was False.',
 
     progress: 'Progress',
   },
@@ -565,6 +613,13 @@ const T = {
     avgTime: 'Sredni czas',
     playAgain: 'Zagraj ponownie',
     timesTables: 'Tabliczka mno\u017Cenia',
+    missingNumber: 'Brakuj\u0105ca liczba',
+    trueOrFalse: 'Prawda czy fa\u0142sz',
+    numberBonds: 'Uzupe\u0142nij do',
+    trueLbl: 'Prawda',
+    falseLbl: 'Fa\u0142sz',
+    wasTrue: 'To by\u0142a prawda.',
+    wasFalse: 'To by\u0142 fa\u0142sz.',
 
     progress: 'Post\u0119p',
   },
@@ -616,6 +671,11 @@ const streakEl        = document.getElementById('streakVal');
 const checkBtn        = document.getElementById('checkBtn');
 const timerBar        = document.getElementById('timerBar');
 const timerDisplay    = document.getElementById('timerDisplay');
+const inputRow        = document.getElementById('inputRow');
+const tfRow           = document.getElementById('tfRow');
+const tfTrueBtn       = document.getElementById('tfTrueBtn');
+const tfFalseBtn      = document.getElementById('tfFalseBtn');
+const numpadEl        = document.querySelector('.numpad');
 
 /* --- Helpers --- */
 const t = () => T[lang];
@@ -656,9 +716,40 @@ document.getElementById('btnTables').addEventListener('click', () => {
   document.getElementById('gameOps').style.display = 'none';
   document.getElementById('progressBar').style.display = 'flex';
   timerBar.style.display = 'none';
+  setInputMode('numpad');
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
   newProblem();
 });
+document.getElementById('btnMissing').addEventListener('click', () => startSimpleMode('missing'));
+document.getElementById('btnTrueFalse').addEventListener('click', () => startSimpleMode('truefalse'));
+document.getElementById('btnMakeN').addEventListener('click', () => startSimpleMode('makeN'));
+
+function startSimpleMode(m) {
+  gameMode = m;
+  timerBar.style.display = 'none';
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  document.getElementById('gameDifficulty').style.display = 'flex';
+  // makeN uses + only by default; hide ops selector. Others show ops.
+  document.getElementById('gameOps').style.display = (m === 'makeN') ? 'none' : 'flex';
+  document.getElementById('progressBar').style.display = 'none';
+  setInputMode(m === 'truefalse' ? 'tf' : 'numpad');
+  showScreen(gameScreen);
+  applyGameLang();
+  resetStats();
+  newProblem();
+}
+
+function setInputMode(kind) {
+  if (kind === 'tf') {
+    inputRow.style.display = 'none';
+    if (numpadEl) numpadEl.style.display = 'none';
+    tfRow.style.display = 'flex';
+  } else {
+    inputRow.style.display = 'flex';
+    if (numpadEl) numpadEl.style.display = '';
+    tfRow.style.display = 'none';
+  }
+}
 
 function startPractice() {
   timerBar.style.display = 'none';
@@ -666,6 +757,7 @@ function startPractice() {
   document.getElementById('gameDifficulty').style.display = 'flex';
   document.getElementById('gameOps').style.display = 'flex';
   document.getElementById('progressBar').style.display = 'none';
+  setInputMode('numpad');
   showScreen(gameScreen);
   applyGameLang();
   resetStats();
@@ -703,6 +795,13 @@ function applyAllLang() {
   // Tables & progress
   document.getElementById('tablesLabel').textContent = t().timesTables;
   document.getElementById('progressLbl').textContent = t().progress;
+
+  // New modes
+  document.getElementById('missingLabel').textContent = t().missingNumber;
+  document.getElementById('trueFalseLabel').textContent = t().trueOrFalse;
+  document.getElementById('makeNLabel').textContent = t().numberBonds;
+  document.getElementById('tfTrueLbl').textContent = t().trueLbl;
+  document.getElementById('tfFalseLbl').textContent = t().falseLbl;
 
   // Results screen
   document.getElementById('resultsTitle').textContent = t().results;
@@ -776,6 +875,7 @@ document.getElementById('btnStart').addEventListener('click', () => {
   document.getElementById('gameDifficulty').style.display = 'flex';
   document.getElementById('gameOps').style.display = 'flex';
   document.getElementById('progressBar').style.display = 'none';
+  setInputMode('numpad');
   seenProblems = new Set();
 
   // Start timer
@@ -840,18 +940,28 @@ function newProblem() {
     return;
   }
 
-  const activeOps = [...ops];
-  if (activeOps.length === 0) { ops.add('+'); activeOps.push('+'); updateOpButtons(); }
-
   let p;
-  let attempts = 0;
-  do {
-    p = generateProblem(mode, activeOps);
-    attempts++;
-  } while (gameMode === 'challenge' && seenProblems.has(`${p.a} ${p.op} ${p.b}`) && attempts < 50);
+  if (gameMode === 'makeN') {
+    p = generateMakeProblem(mode);
+  } else {
+    const activeOps = [...ops];
+    if (activeOps.length === 0) { ops.add('+'); activeOps.push('+'); updateOpButtons(); }
 
-  if (gameMode === 'challenge') {
-    seenProblems.add(`${p.a} ${p.op} ${p.b}`);
+    if (gameMode === 'missing') {
+      p = generateMissingProblem(mode, activeOps);
+    } else if (gameMode === 'truefalse') {
+      p = generateTrueFalseProblem(mode, activeOps);
+    } else {
+      let attempts = 0;
+      do {
+        p = generateProblem(mode, activeOps);
+        attempts++;
+      } while (gameMode === 'challenge' && seenProblems.has(`${p.a} ${p.op} ${p.b}`) && attempts < 50);
+
+      if (gameMode === 'challenge') {
+        seenProblems.add(`${p.a} ${p.op} ${p.b}`);
+      }
+    }
   }
 
   correctAnswer = p.correctAnswer;
@@ -861,15 +971,28 @@ function newProblem() {
   answerEl.value = '';
   document.body.className = 'theme-default';
   problemStartTime = Date.now();
-  answerEl.focus();
+  if (gameMode !== 'truefalse') answerEl.focus();
 }
 
 /* --- Check answer --- */
 function check() {
   if (gameMode === 'challenge' && !timerInterval) return;
+  if (gameMode === 'truefalse') return; // TF uses its own buttons
   const result = checkAnswer(answerEl.value, correctAnswer);
   if (result === null) return;
+  const wrongMsg = `${pick(t().encourage)} ${t().wasAnswer} ${correctAnswer}.`;
+  recordResult(result, wrongMsg);
+}
 
+function checkTrueFalse(userSaysTrue) {
+  if (gameMode !== 'truefalse') return;
+  if (gameMode === 'challenge' && !timerInterval) return;
+  const result = userSaysTrue === correctAnswer;
+  const wrongMsg = `${pick(t().encourage)} ${correctAnswer ? t().wasTrue : t().wasFalse}`;
+  recordResult(result, wrongMsg);
+}
+
+function recordResult(result, wrongFeedback) {
   const solveTime = Date.now() - problemStartTime;
   totalSolveTime += solveTime;
 
@@ -885,7 +1008,7 @@ function check() {
   } else {
     wrongCount++;
     streak = 0;
-    feedbackEl.textContent = `${pick(t().encourage)} ${t().wasAnswer} ${correctAnswer}.`;
+    feedbackEl.textContent = wrongFeedback;
     feedbackEl.className = 'feedback wrong-text';
     document.body.className = 'theme-wrong';
     updateStars();
@@ -897,6 +1020,9 @@ function check() {
   wrongEl.textContent = wrongCount;
   streakEl.textContent = streak;
 }
+
+tfTrueBtn.addEventListener('click', () => checkTrueFalse(true));
+tfFalseBtn.addEventListener('click', () => checkTrueFalse(false));
 
 function updateStars() {
   starsEl.textContent = streak > 0 ? Array(Math.min(streak, 10)).fill('\u2B50').join('') : '';

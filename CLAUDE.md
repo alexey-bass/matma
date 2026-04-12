@@ -16,7 +16,7 @@ Live: https://alexey-bass.github.io/matma/
 ## Architecture
 
 - **`index.html`** — entire app: HTML, CSS, and game logic in a `<script type="module">`. Contains i18n strings (English/Polish), UI state management, DOM event handlers, and numpad input.
-- **`math.js`** — pure functions extracted for testability: `rand`, `pick`, `getRange`, `generateProblem`, `shuffle`, `generateTableProblems`, `checkAnswer`. Imported by both `index.html` and tests.
+- **`math.js`** — pure functions extracted for testability: `rand`, `pick`, `getRange`, `generateProblem`, `shuffle`, `generateTableProblems`, `checkAnswer`, `generateMissingProblem`, `generateTrueFalseProblem`, `generateMakeProblem`. Imported by both `index.html` and tests.
 - **`math.test.js`** — tests for `math.js` using `node:test` and `node:assert/strict`.
 
 ## Key Details
@@ -27,4 +27,7 @@ Live: https://alexey-bass.github.io/matma/
 - Multiplication/division on medium/hard difficulty excludes ×1/÷1 (mulMin = 2)
 - Challenge mode tracks seen problems to avoid duplicates within a session
 - Times Tables mode drills all 81 facts (1×1 through 9×9) in shuffled order
+- Missing Number mode hides operand `a` or `b` (never the result); user solves for the hidden slot
+- True or False mode perturbs the shown result by ±1..±3 for ~50% of problems; TF uses two big buttons instead of the numpad
+- Number Bonds (Make N) targets 10/20/100 for easy/medium/hard; operation is always `+`
 - The answer input is `readonly` — all input comes through the on-screen numpad (prevents mobile keyboard)

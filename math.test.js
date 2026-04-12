@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { rand, pick, getRange, generateProblem, shuffle, generateTableProblems, checkAnswer } from './math.js';
+import { rand, pick, getRange, generateProblem, shuffle, generateTableProblems, checkAnswer, generateMissingProblem, generateTrueFalseProblem, generateMakeProblem } from './math.js';
 
 describe('rand', () => {
   it('returns values within [min, max]', () => {
@@ -213,5 +213,99 @@ describe('checkAnswer', () => {
   it('handles zero correctly', () => {
     assert.strictEqual(checkAnswer('0', 0), true);
     assert.strictEqual(checkAnswer('0', 5), false);
+  });
+});
+
+describe('generateMissingProblem', () => {
+  it('hides exactly one operand and the answer solves it', () => {
+    for (let i = 0; i < 200; i++) {
+      const p = generateMissingProblem('medium', ['+', '−', '×', '÷']);
+      assert.ok(p.missing === 'a' || p.missing === 'b');
+      assert.ok(p.text.includes('?'));
+      assert.strictEqual(p.text.split('?').length - 1, 1, `exactly one ? in "${p.text}"`);
+      if (p.missing === 'a') assert.strictEqual(p.correctAnswer, p.a);
+      else assert.strictEqual(p.correctAnswer, p.b);
+    }
+  });
+
+  it('result appears on the right side of the equation', () => {
+    for (let i = 0; i < 50; i++) {
+      const p = generateMissingProblem('easy', ['+']);
+      assert.ok(/= \d+$/.test(p.text), `text: ${p.text}`);
+    }
+  });
+});
+
+describe('generateTrueFalseProblem', () => {
+  it('returns a boolean correctAnswer', () => {
+    for (let i = 0; i < 50; i++) {
+      const p = generateTrueFalseProblem('easy', ['+']);
+      assert.strictEqual(typeof p.correctAnswer, 'boolean');
+    }
+  });
+
+  it('true problems have shown === real result', () => {
+    for (let i = 0; i < 200; i++) {
+      const p = generateTrueFalseProblem('medium', ['+', '−']);
+      const realResult = p.op === '+' ? p.a + p.b : p.a - p.b;
+      if (p.correctAnswer === true) {
+        assert.strictEqual(p.shown, realResult);
+      } else {
+        assert.notStrictEqual(p.shown, realResult);
+      }
+    }
+  });
+
+  it('shown value is never negative', () => {
+    for (let i = 0; i < 500; i++) {
+      const p = generateTrueFalseProblem('easy', ['+', '−', '×', '÷']);
+      assert.ok(p.shown >= 0, `shown was ${p.shown}`);
+    }
+  });
+
+  it('text has no ? and includes the shown value', () => {
+    for (let i = 0; i < 50; i++) {
+      const p = generateTrueFalseProblem('easy', ['+']);
+      assert.ok(!p.text.includes('?'));
+      assert.ok(p.text.endsWith(`= ${p.shown}`));
+    }
+  });
+});
+
+describe('generateMakeProblem', () => {
+  it('easy targets 10', () => {
+    for (let i = 0; i < 50; i++) {
+      const p = generateMakeProblem('easy');
+      assert.strictEqual(p.target, 10);
+      assert.strictEqual(p.a + p.correctAnswer, 10);
+    }
+  });
+
+  it('medium targets 20', () => {
+    for (let i = 0; i < 50; i++) {
+      const p = generateMakeProblem('medium');
+      assert.strictEqual(p.target, 20);
+      assert.strictEqual(p.a + p.correctAnswer, 20);
+    }
+  });
+
+  it('hard targets 100', () => {
+    for (let i = 0; i < 50; i++) {
+      const p = generateMakeProblem('hard');
+      assert.strictEqual(p.target, 100);
+      assert.strictEqual(p.a + p.correctAnswer, 100);
+    }
+  });
+
+  it('correctAnswer is non-negative and <= target', () => {
+    for (let i = 0; i < 100; i++) {
+      const p = generateMakeProblem('hard');
+      assert.ok(p.correctAnswer >= 0 && p.correctAnswer <= 100);
+    }
+  });
+
+  it('text uses ? for the missing addend', () => {
+    const p = generateMakeProblem('easy');
+    assert.ok(/^\d+ \+ \? = 10$/.test(p.text), `text: ${p.text}`);
   });
 });

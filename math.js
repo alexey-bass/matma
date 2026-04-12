@@ -93,3 +93,56 @@ export function checkAnswer(inputVal, correctAnswer) {
   if (trimmed === '') return null;
   return parseInt(trimmed, 10) === correctAnswer;
 }
+
+/**
+ * Generate a "missing number" problem by hiding one operand of a normal problem.
+ * E.g. `? + 5 = 12` (find 7) or `8 × ? = 24` (find 3).
+ * @returns {{ a, b, op, correctAnswer, text, missing: 'a'|'b' }}
+ */
+export function generateMissingProblem(mode, activeOps) {
+  const p = generateProblem(mode, activeOps);
+  const result = p.correctAnswer;
+  const hide = Math.random() < 0.5 ? 'a' : 'b';
+  let text, correctAnswer;
+  if (hide === 'a') {
+    text = `? ${p.op} ${p.b} = ${result}`;
+    correctAnswer = p.a;
+  } else {
+    text = `${p.a} ${p.op} ? = ${result}`;
+    correctAnswer = p.b;
+  }
+  return { a: p.a, b: p.b, op: p.op, correctAnswer, text, missing: hide };
+}
+
+/**
+ * Generate a "true or false" equation. ~50% are true; the rest are perturbed
+ * by a small non-zero delta (and kept non-negative).
+ * @returns {{ a, b, op, shown: number, correctAnswer: boolean, text: string }}
+ */
+export function generateTrueFalseProblem(mode, activeOps) {
+  const p = generateProblem(mode, activeOps);
+  const isTrue = Math.random() < 0.5;
+  let shown = p.correctAnswer;
+  if (!isTrue) {
+    const deltas = [-3, -2, -1, 1, 2, 3];
+    let delta = pick(deltas);
+    if (p.correctAnswer + delta < 0) delta = Math.abs(delta);
+    shown = p.correctAnswer + delta;
+    if (shown === p.correctAnswer) shown = p.correctAnswer + 1;
+  }
+  const text = `${p.a} ${p.op} ${p.b} = ${shown}`;
+  return { a: p.a, b: p.b, op: p.op, shown, correctAnswer: isTrue, text };
+}
+
+/**
+ * Generate a "make N" number-bond problem: `a + ? = target`.
+ * Target depends on difficulty: easy=10, medium=20, hard=100.
+ * @returns {{ a, b, op: '+', correctAnswer, text, target }}
+ */
+export function generateMakeProblem(mode) {
+  const target = mode === 'easy' ? 10 : mode === 'medium' ? 20 : 100;
+  const a = rand(0, target);
+  const correctAnswer = target - a;
+  const text = `${a} + ? = ${target}`;
+  return { a, b: correctAnswer, op: '+', correctAnswer, text, target };
+}
